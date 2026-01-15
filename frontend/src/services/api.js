@@ -1,0 +1,110 @@
+import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_PREFIX = API_BASE.endsWith('/api') ? '' : '/api';
+const TOKEN_KEY = 'w2w_token';
+const USER_KEY = 'w2w_user';
+
+const api = axios.create({
+  baseURL: API_BASE,
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export function setAuth(authData) {
+  localStorage.setItem(TOKEN_KEY, authData.token);
+  localStorage.setItem(USER_KEY, JSON.stringify({
+    user_id: authData.user_id,
+    email: authData.email,
+    username: authData.username,
+  }));
+}
+
+export function clearAuth() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+}
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function getStoredUser() {
+  const raw = localStorage.getItem(USER_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // Si le JSON est corrompu, on nettoie pour éviter le crash UI
+    localStorage.removeItem(USER_KEY);
+    return null;
+  }
+}
+
+export async function register(payload) {
+  const { data } = await api.post(`${API_PREFIX}/auth/register`, payload);
+  setAuth(data);
+  return data;
+}
+
+export async function login(payload) {
+  const { data } = await api.post(`${API_PREFIX}/auth/login`, payload);
+  setAuth(data);
+  return data;
+}
+
+export async function getMe() {
+  const { data } = await api.get(`${API_PREFIX}/auth/me`);
+  return data;
+}
+
+export async function deleteMe() {
+  const { data } = await api.delete(`${API_PREFIX}/auth/me`);
+  return data;
+}
+
+export async function getMovies(skip = 0, limit = 20) {
+  const { data } = await api.get(`${API_PREFIX}/movies`, { params: { skip, limit } });
+  return data;
+}
+
+export async function searchMovies(query) {
+  const { data } = await api.get(`${API_PREFIX}/movies/search`, { params: { q: query } });
+  return data;
+}
+
+export async function getMovie(movieId) {
+  const { data } = await api.get(`${API_PREFIX}/movies/${movieId}`);
+  return data;
+}
+
+export async function getSimilarMovies(movieId, n = 10) {
+  const { data } = await api.get(`${API_PREFIX}/movies/${movieId}/similar`, { params: { n } });
+  return data;
+}
+
+export async function addRating(payload) {
+  const { data } = await api.post(`${API_PREFIX}/ratings`, payload);
+  return data;
+}
+
+export async function getRatings() {
+  const { data } = await api.get(`${API_PREFIX}/ratings`);
+  return data;
+}
+
+export async function getRecommendations(n = 20) {
+  const { data } = await api.get(`${API_PREFIX}/recommendations`, { params: { n } });
+  return data;
+}
+
+export default api;

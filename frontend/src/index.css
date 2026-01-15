@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Space Grotesk', sans-serif;
+  background:
+    radial-gradient(1000px 500px at 90% -10%, rgba(255, 165, 0, 0.12), transparent 60%),
+    radial-gradient(700px 350px at 10% 0%, rgba(255, 215, 0, 0.10), transparent 60%),
+    linear-gradient(160deg, #0f1419 0%, #101621 40%, #0d1016 100%);
+  color: #f8fafc;
+}
+
+.card-surface {
+  background: linear-gradient(180deg, rgba(28, 31, 38, 0.94), rgba(22, 25, 32, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.grid-fade > * {
+  animation: fadeUp 0.45s ease both;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.06em;
+}
