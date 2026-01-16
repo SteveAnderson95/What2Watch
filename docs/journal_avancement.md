@@ -1,0 +1,1 @@
+- 2026-01-16T18:20:00+01:00 : Ajout API FastAPI avec authentification
