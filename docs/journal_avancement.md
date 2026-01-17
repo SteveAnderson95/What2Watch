@@ -1,1 +1,2 @@
 - 2026-01-16T18:20:00+01:00 : Ajout API FastAPI avec authentification
+- 2026-01-17T14:15:00+01:00 : Creation modeles SQLAlchemy
