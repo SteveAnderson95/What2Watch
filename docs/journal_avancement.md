@@ -3,3 +3,4 @@
 - 2026-01-18T19:05:00+01:00 : Ajout schemas Pydantic et validation
 - 2026-01-19T21:00:00+01:00 : Connexion PostgreSQL et init base
 - 2026-01-20T17:35:00+01:00 : Endpoints films liste et recherche
+- 2026-01-22T22:10:00+01:00 : Ajout gestion ratings utilisateur
