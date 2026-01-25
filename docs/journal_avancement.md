@@ -5,3 +5,4 @@
 - 2026-01-20T17:35:00+01:00 : Endpoints films liste et recherche
 - 2026-01-22T22:10:00+01:00 : Ajout gestion ratings utilisateur
 - 2026-01-24T16:45:00+01:00 : Preparation notebook exploration dataset
+- 2026-01-25T20:30:00+01:00 : Nettoyage donnees movies et keywords
