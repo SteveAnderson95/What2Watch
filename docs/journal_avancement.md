@@ -8,3 +8,4 @@
 - 2026-01-25T20:30:00+01:00 : Nettoyage donnees movies et keywords
 - 2026-01-27T23:00:00+01:00 : Feature engineering metadata films
 - 2026-01-29T18:55:00+01:00 : Premier modele content-based TF-IDF
+- 2026-01-31T21:15:00+01:00 : Integration SVD collaboratif
