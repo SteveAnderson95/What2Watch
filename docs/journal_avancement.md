@@ -10,3 +10,4 @@
 - 2026-01-29T18:55:00+01:00 : Premier modele content-based TF-IDF
 - 2026-01-31T21:15:00+01:00 : Integration SVD collaboratif
 - 2026-02-02T19:25:00+01:00 : Ajout endpoint recommendations
+- 2026-02-04T22:05:00+01:00 : Fix bug numpy matrix dans similarite cosine
