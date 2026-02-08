@@ -12,3 +12,4 @@
 - 2026-02-02T19:25:00+01:00 : Ajout endpoint recommendations
 - 2026-02-04T22:05:00+01:00 : Fix bug numpy matrix dans similarite cosine
 - 2026-02-06T20:45:00+01:00 : Refactor pipeline ML en scripts simples
+- 2026-02-08T17:10:00+01:00 : Sauvegarde modeles avec joblib
