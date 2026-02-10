@@ -13,3 +13,4 @@
 - 2026-02-04T22:05:00+01:00 : Fix bug numpy matrix dans similarite cosine
 - 2026-02-06T20:45:00+01:00 : Refactor pipeline ML en scripts simples
 - 2026-02-08T17:10:00+01:00 : Sauvegarde modeles avec joblib
+- 2026-02-10T18:30:00+01:00 : Creation frontend React + routing
