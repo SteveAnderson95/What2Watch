@@ -15,3 +15,4 @@
 - 2026-02-08T17:10:00+01:00 : Sauvegarde modeles avec joblib
 - 2026-02-10T18:30:00+01:00 : Creation frontend React + routing
 - 2026-02-12T21:00:00+01:00 : Ajout ecrans login et register
+- 2026-02-14T19:50:00+01:00 : Page onboarding pour noter des films
