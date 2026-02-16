@@ -16,3 +16,4 @@
 - 2026-02-10T18:30:00+01:00 : Creation frontend React + routing
 - 2026-02-12T21:00:00+01:00 : Ajout ecrans login et register
 - 2026-02-14T19:50:00+01:00 : Page onboarding pour noter des films
+- 2026-02-16T20:20:00+01:00 : Home avec recommandations et explorer
