@@ -17,3 +17,4 @@
 - 2026-02-12T21:00:00+01:00 : Ajout ecrans login et register
 - 2026-02-14T19:50:00+01:00 : Page onboarding pour noter des films
 - 2026-02-16T20:20:00+01:00 : Home avec recommandations et explorer
+- 2026-02-18T22:35:00+01:00 : Recherche films + suggestions
