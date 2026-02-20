@@ -18,3 +18,4 @@
 - 2026-02-14T19:50:00+01:00 : Page onboarding pour noter des films
 - 2026-02-16T20:20:00+01:00 : Home avec recommandations et explorer
 - 2026-02-18T22:35:00+01:00 : Recherche films + suggestions
+- 2026-02-20T18:40:00+01:00 : Page detail film avec note utilisateur
