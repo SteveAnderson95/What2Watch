@@ -24,3 +24,4 @@
 - 2026-02-24T19:15:00+01:00 : Amelioration UX profile et navbar
 - 2026-02-25T20:05:00+01:00 : Ajout suppression compte utilisateur
 - 2026-02-26T22:20:00+01:00 : Refactor frontend utils mapping et format
+- 2026-02-27T18:50:00+01:00 : Guide equipe et documentation technique
