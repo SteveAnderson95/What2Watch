@@ -26,3 +26,4 @@
 - 2026-02-26T22:20:00+01:00 : Refactor frontend utils mapping et format
 - 2026-02-27T18:50:00+01:00 : Guide equipe et documentation technique
 - 2026-02-28T21:40:00+01:00 : Fix CORS et deploiement Render
+- 2026-03-02T23:10:00+01:00 : Documentation finale et README
