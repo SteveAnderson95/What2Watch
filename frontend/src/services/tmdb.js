@@ -6,6 +6,7 @@ const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 const CACHE_KEY = 'w2w_tmdb_cache_v1';
 
 let cache = {};
+const inFlight = {};
 
 try {
   const raw = localStorage.getItem(CACHE_KEY);
@@ -72,45 +73,78 @@ export async function getMovieVisualData(movie) {
     return cache[key];
   }
 
-  try {
-    const tmdbId = movie.tmdbId || movie.tmdb_id;
-    let tmdb = null;
+  // Si ce film est déjà en cours de chargement, on réutilise la même promesse
+  // pour éviter plusieurs appels réseau identiques en parallèle.
+  if (inFlight[key]) {
+    return inFlight[key];
+  }
 
-    // Priorite: tmdbId backend, sinon fallback recherche par titre
-    if (tmdbId) {
-      tmdb = await fetchTmdbById(tmdbId);
-    } else if (movie.title) {
-      tmdb = await searchTmdbByTitle(movie.title);
-    }
-
-    const data = {
-      tmdbId: tmdb?.id || tmdbId || null,
-      posterPath: tmdb?.poster_path || null,
-      posterUrl: tmdb?.poster_path ? getPosterUrl(tmdb.poster_path) : '',
-      overview: tmdb?.overview || '',
-      voteAverage: tmdb?.vote_average || null,
-      releaseDate: tmdb?.release_date || '',
-      runtime: tmdb?.runtime || null,
-      budget: tmdb?.budget || 0,
-      revenue: tmdb?.revenue || 0,
-    };
-
-    cache[key] = data;
-    saveCache();
-    return data;
-  } catch {
-    return {
-      tmdbId: null,
-      posterPath: null,
-      posterUrl: '',
-      overview: '',
-      voteAverage: null,
-      releaseDate: '',
+  // Cas rapide: certaines cartes viennent déjà de TMDB (poster + note).
+  // On évite alors un nouvel appel HTTP.
+  const quickPosterPath = movie.poster_path || movie.posterPath || null;
+  const quickVoteAverage = movie.tmdb_vote_average ?? movie.vote_average ?? null;
+  if (quickPosterPath || quickVoteAverage !== null) {
+    const quickData = {
+      tmdbId: movie.tmdbId || movie.tmdb_id || null,
+      posterPath: quickPosterPath,
+      posterUrl: quickPosterPath ? getPosterUrl(quickPosterPath) : '',
+      overview: movie.overview || '',
+      voteAverage: quickVoteAverage !== null ? Number(quickVoteAverage) : null,
+      releaseDate: movie.release_date || '',
       runtime: null,
       budget: 0,
       revenue: 0,
     };
+    cache[key] = quickData;
+    saveCache();
+    return quickData;
   }
+
+  inFlight[key] = (async () => {
+    try {
+      const tmdbId = movie.tmdbId || movie.tmdb_id;
+      let tmdb = null;
+
+      // Priorite: tmdbId backend, sinon fallback recherche par titre
+      if (tmdbId) {
+        tmdb = await fetchTmdbById(tmdbId);
+      } else if (movie.title) {
+        tmdb = await searchTmdbByTitle(movie.title);
+      }
+
+      const data = {
+        tmdbId: tmdb?.id || tmdbId || null,
+        posterPath: tmdb?.poster_path || null,
+        posterUrl: tmdb?.poster_path ? getPosterUrl(tmdb.poster_path) : '',
+        overview: tmdb?.overview || '',
+        voteAverage: tmdb?.vote_average || null,
+        releaseDate: tmdb?.release_date || '',
+        runtime: tmdb?.runtime || null,
+        budget: tmdb?.budget || 0,
+        revenue: tmdb?.revenue || 0,
+      };
+
+      cache[key] = data;
+      saveCache();
+      return data;
+    } catch {
+      return {
+        tmdbId: null,
+        posterPath: null,
+        posterUrl: '',
+        overview: '',
+        voteAverage: null,
+        releaseDate: '',
+        runtime: null,
+        budget: 0,
+        revenue: 0,
+      };
+    } finally {
+      delete inFlight[key];
+    }
+  })();
+
+  return inFlight[key];
 }
 
 export async function getTmdbSimilar(tmdbId) {

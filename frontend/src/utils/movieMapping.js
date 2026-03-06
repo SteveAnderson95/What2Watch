@@ -47,6 +47,10 @@ export function mapTmdbMoviesToBackend(tmdbMovies, backendMovies) {
       ...match,
       tmdbId: tmdb.id,
       tmdb_id: tmdb.id,
+      poster_path: tmdb.poster_path || null,
+      backdrop_path: tmdb.backdrop_path || null,
+      vote_average: tmdb.vote_average ?? null,
+      release_date: tmdb.release_date || '',
       tmdb_vote_average: tmdb.vote_average,
     });
   }
