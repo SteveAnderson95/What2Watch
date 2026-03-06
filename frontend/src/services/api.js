@@ -9,12 +9,36 @@ const USER_KEY = 'w2w_user';
 const MOVIES_CACHE_TTL = 5 * 60 * 1000;
 const moviesCache = {};
 
+function safeGetItem(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // En navigation privée stricte ou stockage bloqué, on évite le crash UI.
+  }
+}
+
+function safeRemoveItem(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Rien: le but est surtout d'éviter une exception fatale.
+  }
+}
+
 const api = axios.create({
   baseURL: API_BASE,
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = safeGetItem(TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,8 +46,8 @@ api.interceptors.request.use((config) => {
 });
 
 export function setAuth(authData) {
-  localStorage.setItem(TOKEN_KEY, authData.token);
-  localStorage.setItem(USER_KEY, JSON.stringify({
+  safeSetItem(TOKEN_KEY, authData?.token || '');
+  safeSetItem(USER_KEY, JSON.stringify({
     user_id: authData.user_id,
     email: authData.email,
     username: authData.username,
@@ -31,16 +55,16 @@ export function setAuth(authData) {
 }
 
 export function clearAuth() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  safeRemoveItem(TOKEN_KEY);
+  safeRemoveItem(USER_KEY);
 }
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return safeGetItem(TOKEN_KEY);
 }
 
 export function getStoredUser() {
-  const raw = localStorage.getItem(USER_KEY);
+  const raw = safeGetItem(USER_KEY);
   if (!raw) {
     return null;
   }
@@ -49,7 +73,7 @@ export function getStoredUser() {
     return JSON.parse(raw);
   } catch {
     // Si le JSON est corrompu, on nettoie pour éviter le crash UI
-    localStorage.removeItem(USER_KEY);
+    safeRemoveItem(USER_KEY);
     return null;
   }
 }

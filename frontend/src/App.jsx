@@ -1,3 +1,4 @@
+import { Component } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
@@ -48,6 +49,52 @@ function RootPage() {
   return <Landing />;
 }
 
+class AppErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    // Log minimal pour debug en prod (console navigateur).
+    // Cela évite l'écran noir silencieux.
+    // eslint-disable-next-line no-console
+    console.error('Erreur React non geree:', error);
+  }
+
+  handleReset = () => {
+    clearAuth();
+    window.location.href = '/login';
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-brand-bg px-4 py-10 text-white">
+          <div className="mx-auto max-w-xl rounded-2xl card-surface p-6">
+            <h1 className="section-title text-4xl text-brand-accent">Une erreur est survenue</h1>
+            <p className="mt-3 text-sm text-slate-300">
+              L'application a rencontre un probleme inattendu. Tu peux relancer la session.
+            </p>
+            <button
+              onClick={this.handleReset}
+              className="mt-5 rounded-xl bg-brand-primary px-4 py-2 font-semibold text-black hover:bg-brand-accent"
+            >
+              Revenir a la connexion
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 function AppLayout() {
   const location = useLocation();
   const isLanding = location.pathname === '/';
@@ -90,7 +137,9 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppLayout />
+      <AppErrorBoundary>
+        <AppLayout />
+      </AppErrorBoundary>
     </BrowserRouter>
   );
 }
