@@ -1,10 +1,29 @@
 import { Star } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getMovieVisualData } from '../services/tmdb';
+import { getMovieVisualData, getPosterUrl } from '../services/tmdb';
+
+function buildQuickVisual(movie) {
+  const posterPath = movie?.poster_path || movie?.posterPath || null;
+  const posterUrl = movie?.posterUrl || (posterPath ? getPosterUrl(posterPath) : '');
+  const voteAverage = movie?.tmdb_vote_average ?? movie?.vote_average ?? null;
+
+  return {
+    tmdbId: movie?.tmdbId || movie?.tmdb_id || null,
+    posterPath,
+    posterUrl,
+    overview: movie?.overview || '',
+    voteAverage: voteAverage !== null ? Number(voteAverage) : null,
+    releaseDate: movie?.release_date || '',
+    runtime: null,
+    budget: 0,
+    revenue: 0,
+  };
+}
 
 export default function MovieCard({ movie, showMatch = false }) {
-  const [visual, setVisual] = useState(null);
+  const quickVisual = useMemo(() => buildQuickVisual(movie), [movie]);
+  const [visual, setVisual] = useState(quickVisual);
 
   const movieId = movie.movie_id ?? movie.movieId;
   const title = movie.title || 'Untitled movie';
@@ -15,10 +34,19 @@ export default function MovieCard({ movie, showMatch = false }) {
   useEffect(() => {
     let active = true;
 
+    // Si on a déjà les infos visuelles de base (poster + note TMDB),
+    // on évite un appel réseau supplémentaire.
+    if (quickVisual.posterUrl && quickVisual.voteAverage !== null) {
+      setVisual(quickVisual);
+      return () => {
+        active = false;
+      };
+    }
+
     async function loadVisual() {
       const data = await getMovieVisualData(movie);
       if (active) {
-        setVisual(data);
+        setVisual(data || quickVisual);
       }
     }
 
@@ -26,7 +54,7 @@ export default function MovieCard({ movie, showMatch = false }) {
     return () => {
       active = false;
     };
-  }, [movie]);
+  }, [movie, quickVisual]);
 
   const content = (
     <>
