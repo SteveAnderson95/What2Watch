@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
 import { getMovies, getRatings, getRecommendations, searchMovies } from '../services/api';
-import { getTrendingAndTopRatedMix, getTrendingMovies } from '../services/tmdb';
+import { getTrendingAndTopRatedMix } from '../services/tmdb';
 import { mapTmdbMoviesToBackend } from '../utils/movieMapping';
 
 export default function Home() {
@@ -32,11 +32,10 @@ export default function Home() {
 
       try {
         // Chargement parallèle pour garder la page fluide.
-        const [recoData, backendMovies, tmdbMix, tmdbTrending, ratings] = await Promise.all([
-          getRecommendations(40),
-          getMovies(0, 500),
+        const [recoData, backendMovies, tmdbMix, ratings] = await Promise.all([
+          getRecommendations(20),
+          getMovies(0, 1000),
           getTrendingAndTopRatedMix(),
-          getTrendingMovies(),
           getRatings(),
         ]);
 
@@ -45,11 +44,12 @@ export default function Home() {
         setRatingsCount(ratings.length);
 
         // On rattache les films TMDB à notre catalogue interne (movie_id).
+        // On réutilise la même base pour "Tendances" et "Explorer" pour
+        // éviter des appels réseau supplémentaires.
         const mappedExplore = mapTmdbMoviesToBackend(tmdbMix, backendMovies);
-        setExploreMovies(mappedExplore.length > 0 ? mappedExplore : backendMovies);
-
-        const mappedTrending = mapTmdbMoviesToBackend(tmdbTrending, backendMovies);
-        setTrendingNow(mappedTrending);
+        const explore = mappedExplore.length > 0 ? mappedExplore : backendMovies;
+        setExploreMovies(explore);
+        setTrendingNow(explore.slice(0, 30));
       } catch (err) {
         setError(err?.response?.data?.detail || 'Erreur de chargement Home');
       } finally {
