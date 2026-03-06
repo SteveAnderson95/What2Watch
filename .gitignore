@@ -28,3 +28,9 @@ data/processed/*.csv
 # OS / IDE
 .DS_Store
 .vscode/
+
+# Fichiers non publies
+docs/
+DEPLOY_RENDER.md
+TEAM_GUIDE.md
+create_git_history.sh
