@@ -11,7 +11,8 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # Engine SQLAlchemy (connexion à PostgreSQL)
-engine = create_engine(DATABASE_URL)
+# pool_pre_ping évite des erreurs de connexions inactives en production.
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 # Session locale pour faire les requêtes SQL
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -30,9 +30,10 @@ class Movie(Base):
 # Table des notes utilisateur
 class Rating(Base):
     __tablename__ = "ratings"
+    __table_args__ = (UniqueConstraint("user_id", "movie_id", name="uq_ratings_user_movie"),)
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     movie_id = Column(Integer, index=True, nullable=False)
     rating = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)

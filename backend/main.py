@@ -1,12 +1,13 @@
 import os
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 import models
 import schemas
 from auth import create_access_token, get_current_user, hash_password, verify_password
 from database import engine, get_db
-from ml_service import get_recommendations, get_similar_movies, load_ml_models
+from ml_service import get_recommendations, get_similar_movies, invalidate_user_cache, load_ml_models
 from models import Movie, Rating, User
 
 
@@ -48,6 +49,14 @@ def startup_event():
         load_ml_models()
     except Exception as e:
         print("Erreur chargement ML:", e)
+
+    # Optimisation simple: index SQL sur les ratings les plus sollicités.
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_ratings_user_id ON ratings(user_id)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_ratings_user_movie ON ratings(user_id, movie_id)"))
+    except Exception as e:
+        print("Erreur creation index perf:", e)
 
 
 @app.get("/health")
@@ -111,6 +120,7 @@ def me(current_user: User = Depends(get_current_user)):
 @app.delete("/api/auth/me")
 def delete_my_account(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Supprime le compte connecté (et ses ratings via cascade)
+    invalidate_user_cache(current_user.id)
     db.delete(current_user)
     db.commit()
     return {"success": True}
@@ -160,6 +170,7 @@ def add_rating(payload: schemas.RatingCreate, current_user: User = Depends(get_c
         db.add(Rating(user_id=current_user.id, movie_id=payload.movie_id, rating=payload.rating))
 
     db.commit()
+    invalidate_user_cache(current_user.id)
     return {"success": True}
 
 
