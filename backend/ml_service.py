@@ -1,4 +1,5 @@
 import os
+import time
 import joblib
 import numpy as np
 import pandas as pd
@@ -12,6 +13,12 @@ SVD_MODEL = None
 TFIDF_MATRIX = None
 MOVIES_DF = None
 MODELS_LOADED = False
+# Cache mémoire pour éviter de recalculer la même recommandation
+# à chaque rafraîchissement de la page.
+RECO_CACHE = {}
+SIMILAR_CACHE = {}
+RECO_CACHE_TTL = int(os.getenv("RECO_CACHE_TTL", "300"))
+SIMILAR_CACHE_TTL = int(os.getenv("SIMILAR_CACHE_TTL", "1800"))
 
 
 def load_ml_models():
@@ -59,8 +66,22 @@ def _estimate_collab(user_id, movie_id):
     return float(SVD_MODEL.predict(user_id, movie_id).est / 5.0)
 
 
+def invalidate_user_cache(user_id):
+    # On invalide les recommandations de l'utilisateur après une nouvelle note
+    # pour éviter de servir une version obsolète.
+    keys_to_delete = [key for key in RECO_CACHE if key[0] == int(user_id)]
+    for key in keys_to_delete:
+        RECO_CACHE.pop(key, None)
+
+
 def get_recommendations(user_id, n=20):
     load_ml_models()
+    cache_key = (int(user_id), int(n))
+    cache_entry = RECO_CACHE.get(cache_key)
+    now = time.time()
+    if cache_entry and (now - cache_entry["ts"]) < RECO_CACHE_TTL:
+        return cache_entry["df"].copy()
+
     user_ratings = _get_user_ratings_df(user_id)
 
     # Cas simple: nouveau user sans note => fallback films populaires
@@ -72,7 +93,9 @@ def get_recommendations(user_id, n=20):
         recs = recs.head(n).copy()
         recs["genres"] = recs.apply(_get_genres, axis=1)
         recs["match_percent"] = 50.0
-        return recs[["movieId", "title", "genres", "match_percent"]]
+        result = recs[["movieId", "title", "genres", "match_percent"]]
+        RECO_CACHE[cache_key] = {"ts": now, "df": result.copy()}
+        return result
 
     seen_movies = set(user_ratings["movieId"].tolist())
     liked_movies = user_ratings[user_ratings["rating"] >= 4]["movieId"].tolist()
@@ -83,40 +106,42 @@ def get_recommendations(user_id, n=20):
     else:
         user_profile = None
 
-    rows = []
-    for idx, row in MOVIES_DF.iterrows():
-        movie_id = int(row["movieId"])
-        if movie_id in seen_movies:
-            continue
-
-        if user_profile is None:
-            content_score = 0.0
-        else:
-            content_score = float(cosine_similarity(user_profile, TFIDF_MATRIX[idx])[0][0])
-
-        collab_score = _estimate_collab(user_id, movie_id)
-        final_score = 0.6 * content_score + 0.4 * collab_score
-
-        rows.append(
-            {
-                "movieId": movie_id,
-                "title": row["title"],
-                "genres": _get_genres(row),
-                "final_score": final_score,
-            }
-        )
-
-    if len(rows) == 0:
+    candidates = MOVIES_DF[~MOVIES_DF["movieId"].isin(seen_movies)].copy()
+    if len(candidates) == 0:
         return pd.DataFrame(columns=["movieId", "title", "genres", "match_percent"])
 
-    recs = pd.DataFrame(rows)
-    recs = recs.sort_values("final_score", ascending=False).head(n).copy()
+    if user_profile is None:
+        content_scores = np.zeros(len(candidates), dtype=float)
+    else:
+        # Similarité cosine calculée en une seule opération (plus rapide
+        # que de recalculer film par film dans une boucle Python).
+        content_scores = cosine_similarity(user_profile, TFIDF_MATRIX[candidates.index])[0]
+
+    if SVD_MODEL is None:
+        collab_scores = np.full(len(candidates), 0.5, dtype=float)
+    else:
+        collab_scores = np.array(
+            [_estimate_collab(user_id, int(movie_id)) for movie_id in candidates["movieId"].tolist()],
+            dtype=float,
+        )
+
+    candidates["genres"] = candidates.apply(_get_genres, axis=1)
+    candidates["final_score"] = 0.6 * content_scores + 0.4 * collab_scores
+    recs = candidates.sort_values("final_score", ascending=False).head(n).copy()
     recs["match_percent"] = (recs["final_score"] * 100).round(1)
-    return recs[["movieId", "title", "genres", "match_percent"]]
+    result = recs[["movieId", "title", "genres", "match_percent"]]
+    RECO_CACHE[cache_key] = {"ts": now, "df": result.copy()}
+    return result
 
 
 def get_similar_movies(movie_id, n=10):
     load_ml_models()
+    cache_key = (int(movie_id), int(n))
+    cache_entry = SIMILAR_CACHE.get(cache_key)
+    now = time.time()
+    if cache_entry and (now - cache_entry["ts"]) < SIMILAR_CACHE_TTL:
+        return cache_entry["df"].copy()
+
     idx_list = MOVIES_DF[MOVIES_DF["movieId"] == movie_id].index.tolist()
     if len(idx_list) == 0:
         return pd.DataFrame(columns=["movieId", "title", "genres", "match_percent"])
@@ -141,4 +166,6 @@ def get_similar_movies(movie_id, n=10):
         if len(rows) >= n:
             break
 
-    return pd.DataFrame(rows)
+    result = pd.DataFrame(rows)
+    SIMILAR_CACHE[cache_key] = {"ts": now, "df": result.copy()}
+    return result
