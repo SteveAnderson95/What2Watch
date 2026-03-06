@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
-import { clearAuth, deleteMe, getMe, getMovie, getRatings } from '../services/api';
+import { clearAuth, deleteMe, getMe, getMovies, getRatings } from '../services/api';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -15,26 +15,28 @@ export default function Profile() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const [meData, ratingsData] = await Promise.all([getMe(), getRatings()]);
+        const [meData, ratingsData, allMovies] = await Promise.all([
+          getMe(),
+          getRatings(),
+          getMovies(0, 3000),
+        ]);
         setMe(meData);
         setRatings(ratingsData);
 
         // On transforme les ratings en cartes films (comme la page reco)
+        const moviesById = new Map(allMovies.map((movie) => [movie.movie_id, movie]));
         const topRatings = ratingsData.slice(0, 20);
-        const movieCards = await Promise.all(
-          topRatings.map(async (item) => {
-            try {
-              const movie = await getMovie(item.movie_id);
-              return {
-                ...movie,
-                userRating: item.rating,
-                ratedAt: item.created_at,
-              };
-            } catch {
-              return null;
-            }
-          })
-        );
+        const movieCards = topRatings.map((item) => {
+          const movie = moviesById.get(item.movie_id);
+          if (!movie) {
+            return null;
+          }
+          return {
+            ...movie,
+            userRating: item.rating,
+            ratedAt: item.created_at,
+          };
+        });
 
         setRatedMovies(movieCards.filter(Boolean));
       } finally {
