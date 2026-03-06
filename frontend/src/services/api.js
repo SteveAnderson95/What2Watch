@@ -4,6 +4,10 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const API_PREFIX = API_BASE.endsWith('/api') ? '' : '/api';
 const TOKEN_KEY = 'w2w_token';
 const USER_KEY = 'w2w_user';
+// Petit cache mémoire du catalogue films pour éviter de refaire
+// la même requête quand on change de page.
+const MOVIES_CACHE_TTL = 5 * 60 * 1000;
+const moviesCache = {};
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -73,7 +77,15 @@ export async function deleteMe() {
 }
 
 export async function getMovies(skip = 0, limit = 20) {
+  const cacheKey = `${skip}-${limit}`;
+  const now = Date.now();
+  const cacheEntry = moviesCache[cacheKey];
+  if (cacheEntry && now - cacheEntry.ts < MOVIES_CACHE_TTL) {
+    return cacheEntry.data;
+  }
+
   const { data } = await api.get(`${API_PREFIX}/movies`, { params: { skip, limit } });
+  moviesCache[cacheKey] = { ts: now, data };
   return data;
 }
 
