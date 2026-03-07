@@ -1,6 +1,7 @@
 import os
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 import models
@@ -89,14 +90,23 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
     if existing_username:
         raise HTTPException(status_code=400, detail="Username déjà pris")
 
-    user = User(
-        email=payload.email,
-        username=payload.username,
-        password_hash=hash_password(payload.password),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        user = User(
+            email=payload.email,
+            username=payload.username,
+            password_hash=hash_password(payload.password),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except IntegrityError as e:
+        db.rollback()
+        print("Erreur register integrity:", e)
+        raise HTTPException(status_code=400, detail="Email ou username déjà utilisé")
+    except Exception as e:
+        db.rollback()
+        print("Erreur register:", e)
+        raise HTTPException(status_code=500, detail="Création du compte impossible")
 
     token = create_access_token(user.id)
     return {"user_id": user.id, "email": user.email, "username": user.username, "token": token}
