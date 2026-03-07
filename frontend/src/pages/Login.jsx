@@ -25,14 +25,18 @@ export default function Login() {
     event.preventDefault();
     setError('');
     setLoading(true);
+    let didNavigate = false;
 
     try {
       await login(loginForm);
-      navigate('/home');
+      didNavigate = true;
+      navigate('/home', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || 'Connexion impossible');
     } finally {
-      setLoading(false);
+      if (!didNavigate) {
+        setLoading(false);
+      }
     }
   }
 
@@ -40,14 +44,18 @@ export default function Login() {
     event.preventDefault();
     setError('');
     setLoading(true);
+    let didNavigate = false;
 
     try {
       await register(signupForm);
-      navigate('/onboarding');
+      didNavigate = true;
+      navigate('/onboarding', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || 'Inscription impossible');
     } finally {
-      setLoading(false);
+      if (!didNavigate) {
+        setLoading(false);
+      }
     }
   }
 

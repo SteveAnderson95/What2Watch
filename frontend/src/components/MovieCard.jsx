@@ -21,6 +21,16 @@ function buildQuickVisual(movie) {
   };
 }
 
+function formatVoteAverage(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric.toFixed(1) : 'N/A';
+}
+
+function formatUserRating(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric.toFixed(1) : 'N/A';
+}
+
 export default function MovieCard({ movie, showMatch = false }) {
   const quickVisual = useMemo(() => buildQuickVisual(movie), [movie]);
   const [visual, setVisual] = useState(quickVisual);
@@ -79,7 +89,7 @@ export default function MovieCard({ movie, showMatch = false }) {
         <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
           <span className="inline-flex items-center gap-1">
             <Star size={14} className="text-brand-accent" />
-            {visual?.voteAverage ? visual.voteAverage.toFixed(1) : 'N/A'}
+            {formatVoteAverage(visual?.voteAverage)}
           </span>
 
           {showMatch && match !== undefined && (
@@ -90,7 +100,7 @@ export default function MovieCard({ movie, showMatch = false }) {
 
           {userRating !== undefined && (
             <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-300">
-              Ma note: {Number(userRating).toFixed(1)}
+              Ma note: {formatUserRating(userRating)}
             </span>
           )}
         </div>

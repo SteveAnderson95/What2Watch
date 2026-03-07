@@ -230,6 +230,7 @@ export default function Onboarding() {
   }
 
   const progress = Math.round((ratedCount / TARGET_RATINGS) * 100);
+  const safeOverview = typeof visual?.overview === 'string' ? visual.overview : '';
 
   return (
     <section className="mx-auto max-w-3xl animate-fadeUp rounded-2xl card-surface p-6 md:p-8">
@@ -258,7 +259,7 @@ export default function Onboarding() {
         <div>
           <h2 className="text-2xl font-bold">{currentMovie.title}</h2>
           <p className="mt-2 text-sm text-slate-300">{currentMovie.genres || 'Genres non disponibles'}</p>
-          <p className="mt-3 text-sm text-slate-400 line-clamp-5">{visual?.overview || 'Pas de synopsis TMDB disponible pour ce film.'}</p>
+          <p className="mt-3 text-sm text-slate-400 line-clamp-5">{safeOverview || 'Pas de synopsis TMDB disponible pour ce film.'}</p>
 
           <div className="mt-6">
             <RatingButtons onRate={handleRate} onSkip={handleSkip} disabled={saving} />

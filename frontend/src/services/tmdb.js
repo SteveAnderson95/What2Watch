@@ -8,9 +8,35 @@ const CACHE_KEY = 'w2w_tmdb_cache_v1';
 let cache = {};
 const inFlight = {};
 
+function normalizeVisualData(value) {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const rawVoteAverage = value.voteAverage ?? value.vote_average ?? null;
+  const voteAverage = rawVoteAverage === null ? null : Number(rawVoteAverage);
+
+  return {
+    tmdbId: value.tmdbId ?? value.tmdb_id ?? null,
+    posterPath: typeof value.posterPath === 'string' ? value.posterPath : (typeof value.poster_path === 'string' ? value.poster_path : null),
+    posterUrl: typeof value.posterUrl === 'string' ? value.posterUrl : '',
+    overview: typeof value.overview === 'string' ? value.overview : '',
+    voteAverage: Number.isFinite(voteAverage) ? voteAverage : null,
+    releaseDate: typeof value.releaseDate === 'string' ? value.releaseDate : (typeof value.release_date === 'string' ? value.release_date : ''),
+    runtime: Number.isFinite(Number(value.runtime)) ? Number(value.runtime) : null,
+    budget: Number.isFinite(Number(value.budget)) ? Number(value.budget) : 0,
+    revenue: Number.isFinite(Number(value.revenue)) ? Number(value.revenue) : 0,
+  };
+}
+
 try {
   const raw = localStorage.getItem(CACHE_KEY);
-  cache = raw ? JSON.parse(raw) : {};
+  const parsed = raw ? JSON.parse(raw) : {};
+  cache = Object.fromEntries(
+    Object.entries(parsed || {})
+      .map(([key, value]) => [key, normalizeVisualData(value)])
+      .filter(([, value]) => value !== null)
+  );
 } catch {
   cache = {};
 }
@@ -20,6 +46,15 @@ function saveCache() {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {
     // Rien: cache best-effort
+  }
+}
+
+export function clearTmdbCache() {
+  cache = {};
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch {
+    // Rien: reset best-effort
   }
 }
 
@@ -84,7 +119,7 @@ export async function getMovieVisualData(movie) {
   const quickPosterPath = movie.poster_path || movie.posterPath || null;
   const quickVoteAverage = movie.tmdb_vote_average ?? movie.vote_average ?? null;
   if (quickPosterPath || quickVoteAverage !== null) {
-    const quickData = {
+    const quickData = normalizeVisualData({
       tmdbId: movie.tmdbId || movie.tmdb_id || null,
       posterPath: quickPosterPath,
       posterUrl: quickPosterPath ? getPosterUrl(quickPosterPath) : '',
@@ -94,10 +129,12 @@ export async function getMovieVisualData(movie) {
       runtime: null,
       budget: 0,
       revenue: 0,
-    };
-    cache[key] = quickData;
-    saveCache();
-    return quickData;
+    });
+    if (quickData) {
+      cache[key] = quickData;
+      saveCache();
+      return quickData;
+    }
   }
 
   inFlight[key] = (async () => {
@@ -112,7 +149,7 @@ export async function getMovieVisualData(movie) {
         tmdb = await searchTmdbByTitle(movie.title);
       }
 
-      const data = {
+      const data = normalizeVisualData({
         tmdbId: tmdb?.id || tmdbId || null,
         posterPath: tmdb?.poster_path || null,
         posterUrl: tmdb?.poster_path ? getPosterUrl(tmdb.poster_path) : '',
@@ -122,13 +159,15 @@ export async function getMovieVisualData(movie) {
         runtime: tmdb?.runtime || null,
         budget: tmdb?.budget || 0,
         revenue: tmdb?.revenue || 0,
-      };
+      });
 
-      cache[key] = data;
-      saveCache();
-      return data;
+      if (data) {
+        cache[key] = data;
+        saveCache();
+        return data;
+      }
     } catch {
-      return {
+      return normalizeVisualData({
         tmdbId: null,
         posterPath: null,
         posterUrl: '',
@@ -138,7 +177,7 @@ export async function getMovieVisualData(movie) {
         runtime: null,
         budget: 0,
         revenue: 0,
-      };
+      });
     } finally {
       delete inFlight[key];
     }

@@ -39,14 +39,18 @@ export default function Landing() {
     event.preventDefault();
     setLoading(true);
     setError('');
+    let didNavigate = false;
 
     try {
       await register(form);
-      navigate('/onboarding');
+      didNavigate = true;
+      navigate('/onboarding', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || 'Inscription impossible');
     } finally {
-      setLoading(false);
+      if (!didNavigate) {
+        setLoading(false);
+      }
     }
   }
 

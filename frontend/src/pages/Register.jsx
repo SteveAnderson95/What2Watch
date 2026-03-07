@@ -17,15 +17,19 @@ export default function Register() {
     event.preventDefault();
     setError('');
     setLoading(true);
+    let didNavigate = false;
 
     try {
       await register(form);
       // Apres inscription, l'utilisateur va noter ses premiers films
-      navigate('/onboarding');
+      didNavigate = true;
+      navigate('/onboarding', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || 'Inscription impossible');
     } finally {
-      setLoading(false);
+      if (!didNavigate) {
+        setLoading(false);
+      }
     }
   }
 

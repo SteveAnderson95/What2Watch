@@ -11,6 +11,7 @@ import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import { clearAuth, getStoredUser, getToken } from './services/api';
+import { clearTmdbCache } from './services/tmdb';
 
 function hasValidSession() {
   const token = getToken();
@@ -68,6 +69,7 @@ class AppErrorBoundary extends Component {
 
   handleReset = () => {
     clearAuth();
+    clearTmdbCache();
     window.location.href = '/login';
   };
 
