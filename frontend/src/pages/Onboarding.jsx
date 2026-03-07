@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RatingButtons from '../components/RatingButtons';
-import { addRating, getMovies } from '../services/api';
+import { addRating, getErrorMessage, getMovies } from '../services/api';
 import { getMovieVisualData } from '../services/tmdb';
 
 const TARGET_RATINGS = 12;
@@ -116,7 +116,7 @@ export default function Onboarding() {
         setQueue(pool.slice(0, INITIAL_QUEUE_SIZE));
         setReserve(pool.slice(INITIAL_QUEUE_SIZE));
       } catch (err) {
-        setError(err?.response?.data?.detail || 'Impossible de charger les films');
+        setError(getErrorMessage(err, 'Impossible de charger les films'));
       } finally {
         setLoading(false);
       }
@@ -194,7 +194,7 @@ export default function Onboarding() {
 
       goNext();
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Erreur lors de lenvoi de la note');
+      setError(getErrorMessage(err, "Erreur lors de l'envoi de la note"));
     } finally {
       setSaving(false);
     }

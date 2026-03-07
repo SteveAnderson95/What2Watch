@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, register } from '../services/api';
+import { getErrorMessage, login, register } from '../services/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function Login() {
       didNavigate = true;
       navigate('/home', { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Connexion impossible');
+      setError(getErrorMessage(err, 'Connexion impossible'));
     } finally {
       if (!didNavigate) {
         setLoading(false);
@@ -51,7 +51,7 @@ export default function Login() {
       didNavigate = true;
       navigate('/onboarding', { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Inscription impossible');
+      setError(getErrorMessage(err, 'Inscription impossible'));
     } finally {
       if (!didNavigate) {
         setLoading(false);

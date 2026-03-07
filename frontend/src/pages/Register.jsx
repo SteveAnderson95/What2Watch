@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { register } from '../services/api';
+import { getErrorMessage, register } from '../services/api';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function Register() {
       didNavigate = true;
       navigate('/onboarding', { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Inscription impossible');
+      setError(getErrorMessage(err, 'Inscription impossible'));
     } finally {
       if (!didNavigate) {
         setLoading(false);

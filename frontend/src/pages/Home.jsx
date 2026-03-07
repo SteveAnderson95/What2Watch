@@ -2,7 +2,7 @@ import { BarChart3, Flame, Search, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
-import { getMovies, getRatings, getRecommendations, searchMovies } from '../services/api';
+import { getErrorMessage, getMovies, getRatings, getRecommendations, searchMovies } from '../services/api';
 import { getTrendingAndTopRatedMix } from '../services/tmdb';
 import { mapTmdbMoviesToBackend } from '../utils/movieMapping';
 
@@ -56,7 +56,7 @@ export default function Home() {
         setExploreMovies(explore);
         setTrendingNow(explore.slice(0, 30));
       } catch (err) {
-        setError(err?.response?.data?.detail || 'Erreur de chargement Home');
+        setError(getErrorMessage(err, 'Erreur de chargement Home'));
       } finally {
         setLoading(false);
       }

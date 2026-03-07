@@ -1,7 +1,7 @@
 import { Film, LogIn } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../services/api';
+import { getErrorMessage, register } from '../services/api';
 import { getBackdropUrl, getTrendingMovies } from '../services/tmdb';
 
 const FALLBACK_BG = 'https://images.unsplash.com/photo-1489599510532-d2f2f4a3f4b8?auto=format&fit=crop&w=1800&q=80';
@@ -46,7 +46,7 @@ export default function Landing() {
       didNavigate = true;
       navigate('/onboarding', { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Inscription impossible');
+      setError(getErrorMessage(err, 'Inscription impossible'));
     } finally {
       if (!didNavigate) {
         setLoading(false);

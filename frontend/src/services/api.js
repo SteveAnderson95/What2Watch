@@ -78,6 +78,42 @@ export function getStoredUser() {
   }
 }
 
+export function getErrorMessage(err, fallback = 'Erreur inattendue') {
+  const detail = err?.response?.data?.detail;
+
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item;
+        }
+        if (item && typeof item.msg === 'string') {
+          return item.msg;
+        }
+        return '';
+      })
+      .filter(Boolean);
+
+    if (messages.length > 0) {
+      return messages.join(' | ');
+    }
+  }
+
+  if (detail && typeof detail === 'object' && typeof detail.msg === 'string') {
+    return detail.msg;
+  }
+
+  if (typeof err?.message === 'string' && err.message.trim()) {
+    return err.message;
+  }
+
+  return fallback;
+}
+
 export async function register(payload) {
   const { data } = await api.post(`${API_PREFIX}/auth/register`, payload);
   setAuth(data);

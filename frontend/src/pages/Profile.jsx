@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
-import { clearAuth, deleteMe, getMe, getMovies, getRatings } from '../services/api';
+import { clearAuth, deleteMe, getErrorMessage, getMe, getMovies, getRatings } from '../services/api';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ export default function Profile() {
       clearAuth();
       navigate('/');
     } catch (err) {
-      setDeleteError(err?.response?.data?.detail || 'Suppression impossible');
+      setDeleteError(getErrorMessage(err, 'Suppression impossible'));
       setDeleting(false);
     }
   }
