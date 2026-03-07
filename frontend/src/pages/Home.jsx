@@ -39,15 +39,20 @@ export default function Home() {
           getRatings(),
         ]);
 
-        setRecommendations(recoData);
-        setTopMatches(recoData.slice(0, 5));
-        setRatingsCount(ratings.length);
+        const safeReco = Array.isArray(recoData) ? recoData : [];
+        const safeBackendMovies = Array.isArray(backendMovies) ? backendMovies : [];
+        const safeTmdbMix = Array.isArray(tmdbMix) ? tmdbMix : [];
+        const safeRatings = Array.isArray(ratings) ? ratings : [];
+
+        setRecommendations(safeReco);
+        setTopMatches(safeReco.slice(0, 5));
+        setRatingsCount(safeRatings.length);
 
         // On rattache les films TMDB à notre catalogue interne (movie_id).
         // On réutilise la même base pour "Tendances" et "Explorer" pour
         // éviter des appels réseau supplémentaires.
-        const mappedExplore = mapTmdbMoviesToBackend(tmdbMix, backendMovies);
-        const explore = mappedExplore.length > 0 ? mappedExplore : backendMovies;
+        const mappedExplore = mapTmdbMoviesToBackend(safeTmdbMix, safeBackendMovies);
+        const explore = mappedExplore.length > 0 ? mappedExplore : safeBackendMovies;
         setExploreMovies(explore);
         setTrendingNow(explore.slice(0, 30));
       } catch (err) {

@@ -36,10 +36,12 @@ export default function MovieDetail() {
           getSimilarMovies(movieId, 10),
           getMovies(0, 500),
         ]);
+        const safeSimilarData = Array.isArray(similarData) ? similarData : [];
+        const safeBackendMovies = Array.isArray(backendMovies) ? backendMovies : [];
 
         setMovie(movieData);
         setSimilarAlgo(
-          similarData.map((item) => ({
+          safeSimilarData.map((item) => ({
             movie_id: item.movieId,
             title: item.title,
             genres: item.genres,
@@ -59,7 +61,7 @@ export default function MovieDetail() {
 
         setTrailer(trailerData);
         setCredits(creditsData);
-        setSimilarTmdb(mapTmdbMoviesToBackend(tmdbSimilarRaw, backendMovies).slice(0, 10));
+        setSimilarTmdb(mapTmdbMoviesToBackend(Array.isArray(tmdbSimilarRaw) ? tmdbSimilarRaw : [], safeBackendMovies).slice(0, 10));
       } catch {
         setMovie(null);
       } finally {

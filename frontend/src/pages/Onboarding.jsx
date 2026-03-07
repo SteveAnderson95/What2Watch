@@ -110,7 +110,8 @@ export default function Onboarding() {
     async function loadMovies() {
       try {
         const allMovies = await getMovies(0, 600);
-        const pool = pickOnboardingPool(allMovies);
+        const safeMovies = Array.isArray(allMovies) ? allMovies : [];
+        const pool = pickOnboardingPool(safeMovies);
 
         setQueue(pool.slice(0, INITIAL_QUEUE_SIZE));
         setReserve(pool.slice(INITIAL_QUEUE_SIZE));

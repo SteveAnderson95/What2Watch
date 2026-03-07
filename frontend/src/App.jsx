@@ -53,18 +53,21 @@ function RootPage() {
 class AppErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, message: '' };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+      message: error?.message || 'Erreur inconnue',
+    };
   }
 
-  componentDidCatch(error) {
+  componentDidCatch(error, info) {
     // Log minimal pour debug en prod (console navigateur).
     // Cela évite l'écran noir silencieux.
     // eslint-disable-next-line no-console
-    console.error('Erreur React non geree:', error);
+    console.error('Erreur React non geree:', error, info);
   }
 
   handleReset = () => {
@@ -82,6 +85,9 @@ class AppErrorBoundary extends Component {
             <p className="mt-3 text-sm text-slate-300">
               L'application a rencontre un probleme inattendu. Tu peux relancer la session.
             </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Detail: {this.state.message}
+            </p>
             <button
               onClick={this.handleReset}
               className="mt-5 rounded-xl bg-brand-primary px-4 py-2 font-semibold text-black hover:bg-brand-accent"
@@ -95,6 +101,16 @@ class AppErrorBoundary extends Component {
 
     return this.props.children;
   }
+}
+
+function AppWithBoundary() {
+  const location = useLocation();
+
+  return (
+    <AppErrorBoundary key={`${location.pathname}${location.search}`}>
+      <AppLayout />
+    </AppErrorBoundary>
+  );
 }
 
 function AppLayout() {
@@ -139,9 +155,7 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppErrorBoundary>
-        <AppLayout />
-      </AppErrorBoundary>
+      <AppWithBoundary />
     </BrowserRouter>
   );
 }

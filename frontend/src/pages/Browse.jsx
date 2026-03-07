@@ -72,10 +72,19 @@ export default function Browse() {
           getMoviesByGenre(16),
         ]);
 
-        setSections({ trending, topRated, action, comedy, scifi, animation });
+        const nextSections = {
+          trending: Array.isArray(trending) ? trending : [],
+          topRated: Array.isArray(topRated) ? topRated : [],
+          action: Array.isArray(action) ? action : [],
+          comedy: Array.isArray(comedy) ? comedy : [],
+          scifi: Array.isArray(scifi) ? scifi : [],
+          animation: Array.isArray(animation) ? animation : [],
+        };
 
-        if (trending.length > 0 && trending[0].backdrop_path) {
-          setHeroBg(getBackdropUrl(trending[0].backdrop_path));
+        setSections(nextSections);
+
+        if (nextSections.trending.length > 0 && nextSections.trending[0].backdrop_path) {
+          setHeroBg(getBackdropUrl(nextSections.trending[0].backdrop_path));
         }
       } finally {
         setLoading(false);

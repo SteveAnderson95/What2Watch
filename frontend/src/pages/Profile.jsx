@@ -20,12 +20,14 @@ export default function Profile() {
           getRatings(),
           getMovies(0, 3000),
         ]);
+        const safeRatings = Array.isArray(ratingsData) ? ratingsData : [];
+        const safeMovies = Array.isArray(allMovies) ? allMovies : [];
         setMe(meData);
-        setRatings(ratingsData);
+        setRatings(safeRatings);
 
         // On transforme les ratings en cartes films (comme la page reco)
-        const moviesById = new Map(allMovies.map((movie) => [movie.movie_id, movie]));
-        const topRatings = ratingsData.slice(0, 20);
+        const moviesById = new Map(safeMovies.map((movie) => [movie.movie_id, movie]));
+        const topRatings = safeRatings.slice(0, 20);
         const movieCards = topRatings.map((item) => {
           const movie = moviesById.get(item.movie_id);
           if (!movie) {
