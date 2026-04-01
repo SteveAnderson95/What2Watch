@@ -1,109 +1,112 @@
 # What2Watch
 
-Application web de recommandation de films pour PFE, basee sur un systeme hybride :
-- filtrage collaboratif (SVD)
-- filtrage base contenu (TF-IDF)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=flat-square&logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-18-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-Frontend-646CFF?style=flat-square&logo=vite&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![TMDB](https://img.shields.io/badge/TMDB-API-01D277?style=flat-square)
 
-## Stack technique
+Intelligent movie recommendation web application based on machine learning, using user preferences and movie metadata.
 
-- Backend: FastAPI, SQLAlchemy, PostgreSQL, JWT
-- ML: pandas, numpy, scikit-learn, joblib
-- Frontend: React + Vite, Tailwind, Axios, TMDB API
+## Tech stack
 
-## Structure utile
+- Backend: FastAPI, SQLAlchemy, PostgreSQL, JWT, bcrypt
+- Frontend: React 18, Vite, TailwindCSS, Axios
+- Machine Learning: pandas, numpy, scikit-learn, scikit-surprise, joblib
+- External API: TMDB API
 
-```bash
-what2watch/
-├── backend/
-│   ├── main.py
-│   ├── auth.py
-│   ├── database.py
-│   ├── models.py
-│   ├── schemas.py
-│   ├── ml_service.py
-│   ├── init_db.py
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   └── .env.example
-├── data/
-│   └── models/
-├── prepare_data.py
-├── train_models.py
-└── recommend.py
-```
+## Application preview
 
-## Installation locale
+### Landing page
 
-Prerequis:
-- Python 3.12+
-- Node.js 18+
+![Landing page](assets/screenshots/landingPage.png)
+
+### User onboarding
+
+![Onboarding](assets/screenshots/onboardingPage.png)
+
+### Recommendations
+
+![Recommendations](assets/screenshots/recommendationsPage.png)
+
+### Movie details
+
+![Detail film](assets/screenshots/movieDetails.png)
+
+## Local installation
+
+### Requirements
+
+- Python 3.12 or later
+- Node.js 18 or later
 - PostgreSQL
 
-### 1) Backend
+### Quick setup
 
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
+bash setup.sh
 ```
 
-`backend/.env`:
+## Configuration
+
+### Backend
+
+In `backend/.env`:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost/what2watch
 SECRET_KEY=your-secret-key-here
 ```
 
-Initialisation DB:
+### Frontend
 
-```bash
-python init_db.py
-```
-
-Lancement API:
-
-```bash
-uvicorn main:app --reload
-```
-
-Docs API:
-- http://localhost:8000/docs
-
-### 2) Frontend
-
-```bash
-cd ../frontend
-npm install
-cp .env.example .env
-npm run dev
-```
-
-`frontend/.env`:
+In `frontend/.env`:
 
 ```env
 VITE_TMDB_API_KEY=your-api-key-here
 VITE_API_URL=http://localhost:8000/api
 ```
 
-App:
-- http://localhost:5173
+## Run the project
 
-## Dataset
+### 1. Initialize the database
 
-The Movies Dataset (Kaggle):
-- `ratings_small.csv`
-- `movies_metadata.csv`
-- `keywords.csv`
+```bash
+cd backend
+source venv/bin/activate
+python init_db.py
+```
 
-Source:
-- https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset
+### 2. Start the backend
 
-## Auteurs
+```bash
+cd backend
+source venv/bin/activate
+uvicorn main:app --reload
+```
 
-- Steve
-- Mapalo
-- Imane
+API:
+- `http://localhost:8000`
+- `http://localhost:8000/docs`
+
+### 3. Start the frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+Application:
+- `http://localhost:5173`
+
+## Author
+
+**Steve Anderson H.**
+- GitHub: [@SteveAnderson95](https://github.com/SteveAnderson95)
+- LinkedIn: [Steve Anderson HAKIZIMANA](https://www.linkedin.com/in/steve-anderson-hakizimana/)
+
+---
+
+⭐ Feel free to leave a star if you liked this project!

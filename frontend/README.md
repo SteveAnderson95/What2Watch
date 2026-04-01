@@ -1,23 +1,20 @@
-# What2Watch Frontend
+# Frontend What2Watch
 
-## 1) Installer les dependances
+Ce dossier contient l'interface React de l'application.
+
+## Commandes utiles
 
 ```bash
 cd frontend
 npm install
-```
-
-## 2) Configurer URL API
-
-```bash
 cp .env.example .env
-```
-
-## 3) Lancer en dev
-
-```bash
 npm run dev
 ```
 
-Frontend: http://localhost:5173
-Backend attendu: http://localhost:8000
+Application :
+- `http://localhost:5173`
+
+API attendue :
+- `http://localhost:8000/api`
+
+Pour une vue d'ensemble du projet, voir le `README.md` a la racine.
