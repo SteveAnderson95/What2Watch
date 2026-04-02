@@ -1,8 +1,8 @@
-# Variables d'environnement
+# Environment files
 .env
 *.env
 
-# Environnements Python
+# Python
 venv/
 .venv/
 backend/venv/
@@ -17,23 +17,20 @@ dist/
 frontend/node_modules/
 frontend/dist/
 
-# Modeles et artefacts generes localement
+# Generated models and local artifacts
 *.pkl
 *.joblib
 data/models/*.csv
 !data/models/README.md
 
-# Donnees locales non versionnees
+# Local datasets
 data/raw/*.csv
 data/processed/*.csv
 
-# Fichiers internes / locaux
+# Local/internal folders
 .codex
 .codex/
 docs/
-DEPLOY_RENDER.md
-TEAM_GUIDE.md
-create_git_history.sh
 
 # OS / IDE
 .DS_Store
